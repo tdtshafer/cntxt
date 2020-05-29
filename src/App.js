@@ -9,6 +9,7 @@ class App extends Component {
       urlValue: 'paste a link here',
       data: {},
       alreadyRequested: false,
+      resultsLength: 0,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -22,26 +23,34 @@ class App extends Component {
   
   handleSubmit(event) {
     console.log('A url was submitted: ' + this.state.urlValue);
+    console.log(this.state.data);
 
     if(this.state.urlValue.includes('www') && !this.state.alreadyRequested){
       console.log('requesting!');
       fetch("http://www.reddit.com/api/info.json?url=" + this.state.urlValue)
           .then(response => response.json())
           .then(data => this.setState({ data }))
-          .then(console.log('here'));
         
       this.setState({alreadyRequested: true});
     }
     event.preventDefault();
   }
 
-  componentDidMount() {
-
-    
+  componentDidUpdate() {
+    this.processData();
+  }
+  
+  processData() {
+    if(this.state.data['data'] !== undefined){
+      console.log('processing');
+      console.log(this.state.data["data"]["children"].length);
+      if(this.state.data["data"]["children"].length !== this.state.resultsLength){
+        this.setState({resultsLength: this.state.data["data"]["children"].length});
+      }
+    }
   }
 
   render() {
-    console.log(this.state);
     return (
     <div> 
       <form onSubmit={this.handleSubmit}>
@@ -50,6 +59,7 @@ class App extends Component {
       </form>
       <div>https://www.cnn.com/2020/05/28/us/video-george-floyd-contradict-resist-trnd/index.html</div>
       <div>https://www.youtube.com/watch?v=n6QwnzbRUyA</div>
+      <div>{this.state.resultsLength}</div>
     </div>
     );
   }
